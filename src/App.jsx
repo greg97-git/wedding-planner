@@ -1269,7 +1269,7 @@ function Btn({ children, onClick, variant = "primary", size = "md" }) {
 function Select({ value, onChange, options, labels }) {
   return (
     <select value={value} onChange={e => onChange(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
-      {options.map(o => <option key={o} value={o}>{labels?.[o] ?? o || "— None —"}</option>)}
+      {options.map(o => <option key={o} value={o}>{(labels?.[o]) ?? o || "— None —"}</option>)}
     </select>
   );
 }
