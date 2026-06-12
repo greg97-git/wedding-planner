@@ -672,6 +672,52 @@ function SeatingTab({ data, update }) {
   const acceptedGuests = data.guests.filter(g => g.rsvp === "Accepted");
   const unassigned = acceptedGuests.filter(g => !g.tableId);
 
+  useEffect(() => {
+    let animFrame = null;
+    let scrollDir = 0;
+
+    const tick = () => {
+      if (scrollDir !== 0) {
+        window.scrollBy(0, scrollDir);
+        animFrame = requestAnimationFrame(tick);
+      }
+    };
+
+    const onDragOver = (e) => {
+      const threshold = 80;
+      const speed = 8;
+      const prev = scrollDir;
+      if (e.clientY < threshold) {
+        scrollDir = -speed;
+      } else if (e.clientY > window.innerHeight - threshold) {
+        scrollDir = speed;
+      } else {
+        scrollDir = 0;
+      }
+      if (scrollDir !== 0 && prev === 0) {
+        animFrame = requestAnimationFrame(tick);
+      } else if (scrollDir === 0 && animFrame) {
+        cancelAnimationFrame(animFrame);
+        animFrame = null;
+      }
+    };
+
+    const stop = () => {
+      scrollDir = 0;
+      if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+    };
+
+    window.addEventListener("dragover", onDragOver);
+    window.addEventListener("dragend", stop);
+    window.addEventListener("drop", stop);
+    return () => {
+      window.removeEventListener("dragover", onDragOver);
+      window.removeEventListener("dragend", stop);
+      window.removeEventListener("drop", stop);
+      stop();
+    };
+  }, []);
+
   const assignGuest = (guestId, tableId) => {
     update({ guests: data.guests.map(g => g.id === guestId ? { ...g, tableId } : g) });
   };
